@@ -216,7 +216,8 @@ DEFINE_CAFFE_CPU_UNARY_FUNC(sgnbit, \
 DEFINE_CAFFE_CPU_UNARY_FUNC(fabs, y[i] = std::fabs(x[i]));
 
 template <typename Dtype>
-void caffe_cpu_scale(const long n, const Dtype alpha, const Dtype *x, Dtype* y);
+void caffe_cpu_scale(const int n, const Dtype alpha, const Dtype *x, Dtype* y);
+
 //get if columns(true)/rows(false) in matrix X are all zeros
 template <typename Dtype>
 void caffe_cpu_if_all_zero(const int M, const int N, const Dtype *X, int* y, bool dimen=true);
