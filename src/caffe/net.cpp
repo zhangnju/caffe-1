@@ -1274,7 +1274,7 @@ void Net<Dtype>::ShareTrainedLayersWith(const Net* other) {
       target_blobs[j]->ShareData(*source_blob);
 
       
-      }
+
     }
   }
 }
