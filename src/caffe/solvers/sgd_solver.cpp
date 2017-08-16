@@ -868,7 +868,7 @@ Dtype SGDSolver<Dtype>::GetSparsity(int param_id) {
 
   return sparsity;
 }
-/*
+#if 0
 template <typename Dtype>
 Dtype SGDSolver<Dtype>::GetWinogradSparsityOld(int param_id) {
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
@@ -1198,7 +1198,7 @@ void SGDSolver<Dtype>::PrintWinogradFiberSliceSparsity() {
   }
   LOG(INFO) << sparsity_msg_stream.str();
 }
-*/
+#endif
 template <typename Dtype>
 Dtype SGDSolver<Dtype>::GetGroupSparsity(int param_id, bool dimen) {
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
