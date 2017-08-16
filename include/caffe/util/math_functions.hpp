@@ -164,7 +164,11 @@ void caffe_cpu_sparse_dense2csr(const int M, const int N,
 
 // Returns the sum of the absolute values of the elements of vector x
 template <typename Dtype>
-Dtype caffe_cpu_asum(const long n, const Dtype* x);
+Dtype caffe_cpu_asum(const int n, const Dtype* x);
+
+// Returns the column(true)/row(false) sums of the absolute values of the elements of matrix X
+template <typename Dtype>
+void caffe_cpu_asum_along_col_row(const int M, const int N, const Dtype* X, Dtype* y, bool dimen = true);
 
 // the branchless, type-safe version from
 // http://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c

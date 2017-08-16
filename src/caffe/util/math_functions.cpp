@@ -305,17 +305,7 @@ void caffe_div<double>(const long n, const double* a, const double* b,
   vdDiv(n, a, b, y);
 }
 
-template <>
-void caffe_div_checkzero<float>(const int n, const float* a, const float* b,
-    float* y) {
-  vsDivCheckZero(n, a, b, y);
-}
 
-template <>
-void caffe_div_checkzero<double>(const int n, const double* a, const double* b,
-		double* y) {
-  vdDivCheckZero(n, a, b, y);
-}
 
 template <>
 void caffe_inv<float>(const int n, const float* a, float* y) {
@@ -333,20 +323,7 @@ void caffe_powx<float>(const int n, const float* a, const float b,
   vsPowx(n, a, b, y);
 }
 
-template <>
-void caffe_powx_seperate<float>(const int n, const float* a, const float b,
-    float* y) {
-  for(int i=0;i<n;i++){
-	  y[i] = pow(a[i], b);
-  }
-}
-template <>
-void caffe_powx_seperate<double>(const int n, const double* a, const double b,
-		double* y) {
-   for(int i=0;i<n;i++){
-		  y[i] = pow(a[i], b);
-   }
-}
+
 
 template <>
 void caffe_powx<double>(const int n, const double* a, const double b,
@@ -575,135 +552,8 @@ double caffe_cpu_dot<double>(const long n, const double* x, const double* y);
 template
 size_t caffe_cpu_dot<size_t>(const long n, const size_t* x, const size_t* y);
 
-template <>
-void caffe_cpu_sparse_dense2csr<float>(const int M, const int N,
-    float* A,
-    float* A_nonzero_buf, int* A_nonzero_idx_buf, int* A_idx_pointer_buf){
-#ifdef USE_MKL
-	MKL_INT info;
-	const MKL_INT job[] = {0,0,0,2,M*N,1};
-	mkl_sdnscsr(job, &M , &N , A,
-			&N , A_nonzero_buf, A_nonzero_idx_buf, A_idx_pointer_buf,  &info); // FIXME: invalid memory access reported by inspector
-	if(info){
-		LOG(FATAL)<<"The routine is interrupted processing the "<<
-				info<<"-th row "
-				<<"because there is no space in the arrays acsr and ja according to the value nzmax.";
-	}
-#else
-	NOT_IMPLEMENTED;
-#endif
-}
 
-template <>
-void caffe_cpu_sparse_dense2csr<double>(const int M, const int N,
-    double* A,
-    double* A_nonzero_buf, int* A_nonzero_idx_buf, int* A_idx_pointer_buf){
-#ifdef USE_MKL
-	MKL_INT info;
-	const MKL_INT job[] = {0,0,0,2,M*N,1};
-	mkl_ddnscsr(job, &M , &N , A,
-			&N , A_nonzero_buf, A_nonzero_idx_buf, A_idx_pointer_buf,  &info);
-	if(info){
-		LOG(FATAL)<<"The routine is interrupted processing the "<<
-				info<<"-th row "
-				<<"because there is no space in the arrays acsr and ja according to the value nzmax.";
-	}
-#else
-	NOT_IMPLEMENTED;
-#endif
-}
 
-template <>
-void caffe_cpu_sparse_mmcsr<float>(const int M, const int N, const int K,
-    const float alpha,
-    const float* A_nonzero_buf, const int* A_nonzero_idx_buf, const int* A_idx_pointerB_,const int* A_idx_pointerE_,
-    const float* B,
-    const float beta,float* C){
-#ifdef USE_MKL
-	const char *matdescra = "GXXCX";//6 bytes
-	const char transa = 'N';
-	mkl_scsrmm (&transa, &M , &N, &K,
-			&alpha , matdescra,
-			A_nonzero_buf, A_nonzero_idx_buf, A_idx_pointerB_, A_idx_pointerE_,
-			B, &N,
-			&beta , C, &N);
-//#pragma omp parallel
-//	{
-//	  const int BLOCK = 64;
-//
-//	  int nthreads = omp_get_num_threads();
-//	  int tid = omp_get_thread_num();
-//
-//	  int total_work = A_idx_pointerB_[M];
-//	  int work_per_thread = (total_work + nthreads - 1)/nthreads;
-//
-//	  int begin = tid == 0 ? 0 : std::lower_bound(A_idx_pointerB_, A_idx_pointerB_ + M, work_per_thread*tid) - A_idx_pointerB_;
-//	  int end = tid == nthreads - 1 ? M : std::lower_bound(A_idx_pointerB_, A_idx_pointerB_ + M, work_per_thread*(tid + 1)) - A_idx_pointerB_;
-//
-//	  float sum[BLOCK];
-//
-//	  for (int b = 0; b < N/BLOCK; ++b) {
-//		for (int i = begin; i < end; ++i) {
-//		  for (int k = 0; k < BLOCK; ++k) {
-//			sum[k] = 0;
-//		  }
-//		  for (int j = A_idx_pointerB_[i]; j < A_idx_pointerB_[i + 1]; ++j) {
-//			float v = A_nonzero_buf[j];
-//			int c = A_nonzero_idx_buf[j];
-//
-//			for (int k = 0; k < BLOCK; ++k) {
-//			  sum[k] += v*B[c*N + k + b*BLOCK];
-//			}
-//		  }
-//		  for (int k = 0; k < BLOCK; ++k) {
-//			C[i*N + k + b*BLOCK] = sum[k];
-//		  }
-//		}
-//	  }
-//
-//	  int rem = N - N/BLOCK*BLOCK;
-//	  for (int i = begin; i < end; ++i) {
-//		for (int k = 0; k < rem; ++k) {
-//		  sum[k] = 0;
-//		}
-//		for (int j = A_idx_pointerB_[i]; j < A_idx_pointerB_[i + 1]; ++j) {
-//		  float v = A_nonzero_buf[j];
-//		  int c = A_nonzero_idx_buf[j];
-//
-//		  for (int k = 0; k < rem; ++k) {
-//			sum[k] += v*B[c*N + k + (N/BLOCK)*BLOCK];
-//		  }
-//		}
-//		for (int k = 0; k < rem; ++k) {
-//		  C[i*N + k + (N/BLOCK)*BLOCK] = sum[k];
-//		}
-//	  }
-//	}
-#else
-	NOT_IMPLEMENTED;
-#endif
-}
-
-template <>
-void caffe_cpu_sparse_mmcsr<double>(const int M, const int N, const int K,
-    const double alpha,
-    const double* A_nonzero_buf, const int* A_nonzero_idx_buf, const int* A_idx_pointerB_,const int* A_idx_pointerE_,
-    const double* B,
-    const double beta,double* C){
-#ifdef USE_MKL
-	char matdescra[6];
-	matdescra[0] = 'g';
-	matdescra[3] = 'c';
-	const char transa = 'N';
-	mkl_dcsrmm (&transa, &M , &N, &K,
-			&alpha , matdescra,
-			A_nonzero_buf, A_nonzero_idx_buf, A_idx_pointerB_, A_idx_pointerE_,
-			B, &N,
-			&beta , C, &N);
-#else
-	NOT_IMPLEMENTED;
-#endif
-}
 
 template <>
 float caffe_cpu_asum<float>(const int n, const float* x) {
@@ -711,14 +561,14 @@ float caffe_cpu_asum<float>(const int n, const float* x) {
 }
 
 template <>
-double caffe_cpu_asum<double>(const long n, const double* x) {
+double caffe_cpu_asum<double>(const int n, const double* x) {
   return cblas_dasum(n, x, 1);
 }
 
-template <>
-size_t caffe_cpu_asum<size_t>(const long n, const size_t* x) {
+template <typename Dtype>
+Dtype caffe_cpu_asum(const int n, const Dtype* x) {
   NOT_IMPLEMENTED;
-  return 0;
+  return (Dtype)0;
 }
 
 template int caffe_cpu_asum<int>(const int n, const int* x);
@@ -760,7 +610,7 @@ void caffe_cpu_scale<float>(const int n, const float alpha, const float *x,
 }
 
 template <>
-void caffe_cpu_scale<double>(const long n, const double alpha, const double *x,
+void caffe_cpu_scale<double>(const int n, const double alpha, const double *x,
                              double* y) {
   cblas_dcopy(n, x, 1, y, 1);
   cblas_dscal(n, alpha, y, 1);
