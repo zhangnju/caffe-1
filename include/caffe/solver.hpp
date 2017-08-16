@@ -219,6 +219,7 @@ class Solver {
 
   // True iff a request to stop early was received.
   bool requested_early_exit_;
+ 
   static Dtype prune_threshold_, measure_threshold_;
   ForwardBackwardFunc forward_backward_;
 
