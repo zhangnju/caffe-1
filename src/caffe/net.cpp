@@ -1273,8 +1273,7 @@ void Net<Dtype>::ShareTrainedLayersWith(const Net* other) {
           << target_blobs[j]->shape_string();
       target_blobs[j]->ShareData(*source_blob);
 
-      if (needToReshapeWinograd) {
-        layers_[target_layer_id]->WeightAlign();
+      
       }
     }
   }
