@@ -61,13 +61,13 @@ template <typename Dtype>
 class Blob {
  public:
   Blob()
-       : data_(), diff_(), count_(0), capacity_(0) {}
+       : data_(), connectivity_(), diff_(), count_(0), capacity_(0) {}
 
   /// @brief Deprecated; use <code>Blob(const vector<int>& shape)</code>.
   explicit Blob(const int num, const int channels, const int height,
       const int width);
   explicit Blob(const vector<int>& shape);
-
+  enum DisconnectMode { ELTWISE, GRPWISE };//how to disconnect
   /// @brief Deprecated; use <code>Reshape(const vector<int>& shape)</code>.
   void Reshape(const int num, const int channels, const int height,
       const int width);
@@ -248,6 +248,10 @@ class Blob {
     return data_;
   }
 
+  inline const shared_ptr<SyncedMemory>& connectivity() const {
+    return connectivity_;
+  }
+
   inline const shared_ptr<SyncedMemory>& diff() const {
     CHECK(diff_);
     return diff_;
@@ -287,6 +291,36 @@ class Blob {
   shared_ptr<PrvMemDescr> get_prv_diff_descriptor();
 
   void Update();
+
+  // begin for pruning
+  const Dtype* cpu_connectivity() const;
+  const Dtype* gpu_connectivity() const;
+
+  Dtype* mutable_cpu_connectivity();
+  Dtype* mutable_gpu_connectivity();
+
+  void Zerout(Dtype threshold);
+  void Disconnect(DisconnectMode mode, Dtype thre, int group=1);
+  inline void Connect(){ InitializeConnectivity(); }
+  Dtype GetSparsity(Dtype threshold);
+  Dtype GetWinogradSparsity(Dtype threshold);
+
+  void InitializeConnectivity(Dtype val = 1.0);
+
+  /// @brief snapshot to format of Matrix Market http://math.nist.gov/MatrixMarket/formats.html
+  /// For high-mode tensors, we do 0-mode matricization.
+  void WriteToNistMMIO(string filename = "") const;
+  void WriteToNistMMIOSparse(string filename = "") const;
+
+  static void Write1DTensorToNistMMIO(string filename, const Dtype *data, int I);
+  static void Write2DTensorToNistMMIO(string filename, const Dtype *data, int I0, int I1);
+  static void Write4DTensorToNistMMIO(string filename, const Dtype *data, int I0, int I1, int I2, int I3);
+
+  static void Write2DTensorToNistMMIOSparse(string filename, const Dtype *data, int I0, int I1);
+  static void Write3DTensorToNistMMIOSparse(string filename, const Dtype *data, int I0, int I1, int I2);
+  static void Write4DTensorToNistMMIOSparse(string filename, const Dtype *data, int I0, int I1, int I2, int I3);
+  // end for pruning
+
   void FromProto(const BlobProto& proto, bool reshape = true);
   void ToProto(BlobProto* proto, bool write_diff = false) const;
 
@@ -327,6 +361,7 @@ class Blob {
 
  protected:
   shared_ptr<SyncedMemory> data_;
+  shared_ptr<SyncedMemory> connectivity_;
   shared_ptr<SyncedMemory> diff_;
 #ifndef CPU_ONLY
   shared_ptr<SyncedMemory> shape_data_;
