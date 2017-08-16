@@ -146,8 +146,8 @@ class Solver {
    */
   virtual inline const char* type() const { return ""; }
 
-  Dtype getPruneThreshold() { return prune_threshold_; }
-  Dtype getMeasureThreshold() { return measure_threshold_; }
+  static Dtype getPruneThreshold() { return prune_threshold_; }
+  static Dtype getMeasureThreshold() { return measure_threshold_; }
   // The Solver::Snapshot function implements the basic snapshotting utility
   // that stores the learned net. You should implement the SnapshotSolverState()
   // function that produces a SolverState protocol buffer that needs to be
@@ -220,7 +220,7 @@ class Solver {
   // True iff a request to stop early was received.
   bool requested_early_exit_;
  
-  Dtype prune_threshold_, measure_threshold_;
+  static Dtype prune_threshold_, measure_threshold_;
   ForwardBackwardFunc forward_backward_;
 
   DISABLE_COPY_AND_ASSIGN(Solver);
