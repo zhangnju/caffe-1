@@ -306,11 +306,7 @@ void Blob<Dtype>::Update() {
     }
   case SyncedMemory::HEAD_AT_CPU:
     // perform computation on CPU
-    if (connectivity_.get()) {
-      caffe_cpu_eltwise_multi(count_,
-          static_cast<const Dtype*>(connectivity_->cpu_data()),
-          static_cast<Dtype*>(diff_->mutable_cpu_data()) );
-    }
+
     caffe_axpy<Dtype>(count_, Dtype(-1),
         static_cast<const Dtype*>(diff_->cpu_data()),
         static_cast<Dtype*>(data_->mutable_cpu_data()));
@@ -319,11 +315,7 @@ void Blob<Dtype>::Update() {
   case SyncedMemory::SYNCED:
 #ifndef CPU_ONLY
     // perform computation on GPU
-    if (connectivity_.get()) {
-      caffe_gpu_eltwise_multi(count_,
-          static_cast<const Dtype*>(connectivity_->gpu_data()),
-          static_cast<Dtype*>(diff_->mutable_gpu_data()) );
-    }
+   
     caffe_gpu_axpy<Dtype>(count_, Dtype(-1),
         static_cast<const Dtype*>(diff_->gpu_data()),
         static_cast<Dtype*>(data_->mutable_gpu_data()));
@@ -417,28 +409,7 @@ void Blob<Dtype>::Disconnect(DisconnectMode mode,Dtype thre, int group) {
 
 template <typename Dtype>
 Dtype Blob<Dtype>::GetSparsity(Dtype thre){
-  if (4 == num_axes() && shape(0) == shape(1) && (shape(0) == 6 || shape(0) == 8)) {
-    // winograd layer
-    int N = shape(2);
-    int C = shape(3);
-    int K = shape(0) - 4 + 1;
-
-    WinogradGKronG<Dtype> *A = WinogradGKronG<Dtype>::getInstance(K);
-    int M = A->M;
-
-    Dtype *temp = new Dtype[(N*C)*(K*K)];
-    caffe_cpu_gemm(
-        CblasTrans, CblasTrans,
-        N*C, K*K, M*M,
-        (Dtype)1, cpu_data(),
-        A->getInv()->cpu_data(),
-        (Dtype)0, temp);
-    caffe_cpu_if_zerout((N*C)*(K*K), temp, temp, thre);
-    Dtype sparsity = caffe_cpu_asum((N*C)*(K*K), temp)/(N*C*K*K);
-    delete[] temp;
-    return sparsity;
-  }
-  else {
+  {
     int zero_num = 0;
     for(int i=0;i<this->count();i++){
       if( this->cpu_data()[i]<=thre && this->cpu_data()[i]>=-thre){
@@ -448,7 +419,7 @@ Dtype Blob<Dtype>::GetSparsity(Dtype thre){
     return (Dtype)(zero_num) / (Dtype)(this->count());
   }
 }
-
+#if 0
 template <typename Dtype>
 Dtype Blob<Dtype>::GetWinogradSparsity(Dtype thre){
   if (4 == num_axes() && shape(2) == shape(3) && (shape(2) == 3 || shape(2) == 5)) {
@@ -485,7 +456,7 @@ Dtype Blob<Dtype>::GetWinogradSparsity(Dtype thre){
     return GetSparsity(thre);
   }
 }
-
+#endif
 template <> unsigned int Blob<unsigned int>::asum_data() const {
   NOT_IMPLEMENTED;
   return 0;
