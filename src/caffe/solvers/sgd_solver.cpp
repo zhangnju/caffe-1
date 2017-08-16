@@ -295,6 +295,20 @@ void SGDSolver<Dtype>::ApplyUpdate() {
   Dtype rate = GetLearningRate();
   if (this->param_.display() && this->iter_ % this->param_.display() == 0) {
     LOG(INFO) << "Iteration " << this->iter_ << ", lr = " << rate;
+  }
+  ClipGradients();
+  for (int param_id = 0; param_id < this->net_->learnable_params().size();
+       ++param_id) {
+    ApplyUpdate(param_id);
+  }
+}
+
+template <typename Dtype>
+void SGDSolver<Dtype>::ApplyUpdate(int param_id) {
+  CHECK(Caffe::root_solver());
+  Dtype rate = GetLearningRate();
+  if (this->param_.display() && this->iter_ % this->param_.display() == 0) {
+    LOG(INFO) << "Iteration " << this->iter_ << ", lr = " << rate;
 
     //display sparsity
 	//const vector<float>& net_params_weight_decay =
@@ -316,113 +330,59 @@ void SGDSolver<Dtype>::ApplyUpdate() {
 
  
 
-#if 0
-	sparsity_msg_stream.str("");
-	sparsity_msg_stream << "     Column Sparsity %: \n";
-	for (int param_id = 0; param_id < this->net_->learnable_params().size(); ++param_id) {
-		//Dtype local_decay = this->param_.kernel_shape_decay() * this->net_->params_kernel_shape_decay()[param_id];
-    if (this->net_->learnable_params()[param_id]->num_axes() >= 2) {
-		  sparsity_msg_stream << GetGroupSparsity(param_id, true) <<"\t";
-    }
-		//if(local_decay) sparsity_msg_stream << GetGroupSparsity(param_id, true) <<"\t";
-		//else sparsity_msg_stream << -1 <<"\t";
-	}
-	LOG(INFO) << sparsity_msg_stream.str();
-
-	sparsity_msg_stream.str("");
-	sparsity_msg_stream << "        Row Sparsity %: \n";
-	for (int param_id = 0; param_id < this->net_->learnable_params().size(); ++param_id) {
-    if (this->net_->learnable_params()[param_id]->num_axes() >= 2) {
-		  sparsity_msg_stream << GetGroupSparsity(param_id, false) <<"\t";
-    }
-		//if(local_decay) sparsity_msg_stream << GetGroupSparsity(param_id, false) <<"\t";
-		//else sparsity_msg_stream << -1 <<"\t";
-	}
-	LOG(INFO) << sparsity_msg_stream.str();
-
-	sparsity_msg_stream.str("");
-	sparsity_msg_stream << "      Block Sparsity %: \n";
-	for (int param_id = 0; param_id < this->net_->learnable_params().size(); ++param_id) {
-    if (this->net_->learnable_params()[param_id]->num_axes() >= 2) {
-      const vector<BlockGroupLassoSpec> net_params_block_group_lasso =
-                 this->net_->params_block_group_lasso()[param_id];
-      for (int blk_idx=0;blk_idx<net_params_block_group_lasso.size();blk_idx++){
-        int xdimen = net_params_block_group_lasso[blk_idx].xdimen();
-        int ydimen = net_params_block_group_lasso[blk_idx].ydimen();
-        sparsity_msg_stream << "("<<xdimen<<","<<ydimen<<"):"<<GetGroupSparsity(param_id, ydimen, xdimen) <<";";
-      }
-      sparsity_msg_stream << "\t";
-    }
-	}
-	LOG(INFO) << sparsity_msg_stream.str();
-#endif
 
   sparsity_msg_stream.str("");
   sparsity_msg_stream << "        OC-fiber Sparsity %: \n";
-  for (int param_id = 0; param_id < this->net_->learnable_params().size(); ++param_id) {
-    if (this->net_->learnable_params()[param_id]->num_axes() == 4) {
+  
+  if (this->net_->learnable_params()[param_id]->num_axes() == 4) {
       sparsity_msg_stream << GetFiberSparsity(param_id, 0) <<"\t";
-    }
   }
   LOG(INFO) << sparsity_msg_stream.str();
 
   sparsity_msg_stream.str("");
   sparsity_msg_stream << "        IC-fiber Sparsity %: \n";
-  for (int param_id = 0; param_id < this->net_->learnable_params().size(); ++param_id) {
-    if (this->net_->learnable_params()[param_id]->num_axes() == 4) {
+  if (this->net_->learnable_params()[param_id]->num_axes() == 4) {
       sparsity_msg_stream << GetFiberSparsity(param_id, 1) <<"\t";
     }
-  }
   LOG(INFO) << sparsity_msg_stream.str();
 
   sparsity_msg_stream.str("");
   sparsity_msg_stream << "        kernel-fiber Sparsity %: \n";
-  for (int param_id = 0; param_id < this->net_->learnable_params().size(); ++param_id) {
-    if (this->net_->learnable_params()[param_id]->num_axes() == 4) {
-      sparsity_msg_stream << GetFiberSparsity(param_id, 2) <<"\t";
-    }
+  if (this->net_->learnable_params()[param_id]->num_axes() == 4) {
+    sparsity_msg_stream << GetFiberSparsity(param_id, 2) <<"\t";
   }
   LOG(INFO) << sparsity_msg_stream.str();
 
   sparsity_msg_stream.str("");
   sparsity_msg_stream << "        OC-slice Sparsity %: \n";
-  for (int param_id = 0; param_id < this->net_->learnable_params().size(); ++param_id) {
-    if (this->net_->learnable_params()[param_id]->num_axes() == 4) {
+  if (this->net_->learnable_params()[param_id]->num_axes() == 4) {
       sparsity_msg_stream << GetSliceSparsity(param_id, 0) <<"\t";
     }
-  }
   LOG(INFO) << sparsity_msg_stream.str();
 
   sparsity_msg_stream.str("");
   sparsity_msg_stream << "        IC-slice Sparsity %: \n";
-  for (int param_id = 0; param_id < this->net_->learnable_params().size(); ++param_id) {
     if (this->net_->learnable_params()[param_id]->num_axes() == 4) {
       sparsity_msg_stream << GetSliceSparsity(param_id, 1) <<"\t";
-    }
   }
   LOG(INFO) << sparsity_msg_stream.str();
 
   sparsity_msg_stream.str("");
   sparsity_msg_stream << "        kernel-slice Sparsity %: \n";
-  for (int param_id = 0; param_id < this->net_->learnable_params().size(); ++param_id) {
-    if (this->net_->learnable_params()[param_id]->num_axes() == 4) {
+  if (this->net_->learnable_params()[param_id]->num_axes() == 4) {
       sparsity_msg_stream << GetSliceSparsity(param_id, 2) <<"\t";
-    }
   }
   LOG(INFO) << sparsity_msg_stream.str();
   }
 
   ClipGradients();
   Solver<Dtype>::total_regularization_term_ = Dtype(0);
-  for (int param_id = 0; param_id < this->net_->learnable_params().size();
-       ++param_id) {
-    Normalize(param_id);
-    Solver<Dtype>::total_regularization_term_ += Regularize(param_id);
-    //Solver<Dtype>::total_regularization_term_ += GroupLassoRegularize(param_id);
-    ComputeUpdateValue(param_id, rate);
-  }
+  
+  Normalize(param_id);
+  Solver<Dtype>::total_regularization_term_ += Regularize(param_id);
+  ComputeUpdateValue(param_id, rate);
   //this->net_->Update();
-  for (int param_id = 0; param_id < this->net_->learnable_params().size(); ++param_id) {
+  
     Blob<Dtype> *param = this->net_->learnable_params()[param_id];
 
     // copied from blob::Zerout
@@ -620,7 +580,6 @@ void SGDSolver<Dtype>::ApplyUpdate() {
     else {
       LOG(FATAL) << "Unknown regularization type: " << regularization_type;
     }
-  } /* for each parameter */
 }
 
 template <typename Dtype>
