@@ -1258,15 +1258,7 @@ void Net<Dtype>::ShareTrainedLayersWith(const Net* other) {
       bool needToReshapeWinograd = false;
 
       if (target_blobs[j]->shape() != source_blob->shape()) {
-        if (std::string(source_layer->type()) == "Winograd") {
-          // source layer is already reshaped to Winograd match target layer
-          LOG(INFO) << source_blob->shape_string() << " " << target_blobs[j]->shape_string();
-          WinogradLayer<Dtype> *winograd_layer =
-              (WinogradLayer<Dtype> *)(layers_[target_layer_id].get());
-          winograd_layer->ReshapeToWinograd();
-          needToReshapeWinograd = true;
-        }
-        else if (std::string(source_layer->type()) == "Convolution" &&
+        if (std::string(source_layer->type()) == "Convolution" &&
             std::string(layers_[target_layer_id]->type()) == "Winograd") {
           // target Winograd layer reshaped too early
           target_blobs[j]->Reshape(source_layer->blobs()[j]->shape());
