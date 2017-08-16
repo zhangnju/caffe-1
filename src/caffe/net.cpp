@@ -943,8 +943,26 @@ void Net<Dtype>::AppendParam(const NetParameter& param, const int layer_id,
     learnable_param_ids_.push_back(learnable_param_id);
     has_params_lr_.push_back(param_spec->has_lr_mult());
     has_params_decay_.push_back(param_spec->has_decay_mult());
+    has_params_breadth_decay_.push_back(param_spec->has_breadth_decay_mult());
+    has_params_regularization_type_.push_back(param_spec->has_regularization_type());
+    has_params_kernel_shape_decay_.push_back(param_spec->has_kernel_shape_decay_mult());
+    has_params_block_group_lasso_.push_back(param_spec->block_group_lasso_size());
     params_lr_.push_back(param_spec->lr_mult());
     params_weight_decay_.push_back(param_spec->decay_mult());
+    params_breadth_decay_.push_back(param_spec->breadth_decay_mult());
+    params_regularization_type_.push_back(param_spec->regularization_type());
+    params_kernel_shape_decay_.push_back(param_spec->kernel_shape_decay_mult());
+    vector<BlockGroupLassoSpec> block_spec;
+    for(int i=0;i<param_spec->block_group_lasso_size();i++){
+    	block_spec.push_back(param_spec->block_group_lasso(i));
+    }
+    params_block_group_lasso_.push_back(block_spec);
+    if(layer_param.has_convolution_param()){
+		  param_groups_.push_back(layer_param.convolution_param().group());
+	}
+	else {
+	  param_groups_.push_back(1);
+	}
   } else {
     // Named param blob with name we've seen before: share params
     const int owner_net_param_id = param_names_index_[param_name];
@@ -1000,10 +1018,50 @@ void Net<Dtype>::AppendParam(const NetParameter& param, const int layer_id,
         params_weight_decay_[learnable_param_id] = param_spec->decay_mult();
       }
     }
+    if (param_spec->has_breadth_decay_mult()) {
+	  if (has_params_breadth_decay_[learnable_param_id]) {
+		CHECK_EQ(param_spec->breadth_decay_mult(),
+				params_breadth_decay_[learnable_param_id])
+			<< "Shared param '" << param_name << "' has mismatched breadth_decay_mult.";
+	  } else {
+		  has_params_breadth_decay_[learnable_param_id] = true;
+		  params_breadth_decay_[learnable_param_id] = param_spec->breadth_decay_mult();
+	  }
+	}
+    if (param_spec->has_regularization_type()) {
+	  if (has_params_regularization_type_[learnable_param_id]) {
+		CHECK_EQ(param_spec->regularization_type(),
+				params_regularization_type_[learnable_param_id])
+			<< "Shared param '" << param_name << "' has mismatched regularization_type.";
+	  } else {
+		  has_params_regularization_type_[learnable_param_id] = true;
+		  params_regularization_type_[learnable_param_id] = param_spec->regularization_type();
+	  }
+	}
+    if (param_spec->has_kernel_shape_decay_mult()) {
+	  if (has_params_kernel_shape_decay_[learnable_param_id]) {
+		CHECK_EQ(param_spec->kernel_shape_decay_mult(),
+				params_kernel_shape_decay_[learnable_param_id])
+			<< "Shared param '" << param_name << "' has mismatched kernel_shape_decay_mult.";
+	  } else {
+		  has_params_kernel_shape_decay_[learnable_param_id] = true;
+		  params_kernel_shape_decay_[learnable_param_id] = param_spec->kernel_shape_decay_mult();
+	  }
+	}
+    if (param_spec->block_group_lasso_size()) {
+	  if (has_params_block_group_lasso_[learnable_param_id]) {
+		LOG(FATAL) << "duplicate block_group_lasso among shared params.";
+	  } else {
+		  has_params_block_group_lasso_[learnable_param_id] = true;
+	      vector<BlockGroupLassoSpec> block_spec;
+		  for(int i=0;i<param_spec->block_group_lasso_size();i++){
+			  block_spec.push_back(param_spec->block_group_lasso(i));
+		  }
+		  params_block_group_lasso_[learnable_param_id] = block_spec;
+	  }
+	}
   }
 }
-
-
 
 template <typename Dtype>
 Dtype Net<Dtype>::ForwardFromTo(int start, int end) {
@@ -1197,12 +1255,35 @@ void Net<Dtype>::ShareTrainedLayersWith(const Net* other) {
         << "Incompatible number of blobs for layer " << source_layer_name;
     for (int j = 0; j < target_blobs.size(); ++j) {
       Blob<Dtype>* source_blob = source_layer->blobs()[j].get();
+      bool needToReshapeWinograd = false;
+
+      if (target_blobs[j]->shape() != source_blob->shape()) {
+        if (std::string(source_layer->type()) == "Winograd") {
+          // source layer is already reshaped to Winograd match target layer
+          LOG(INFO) << source_blob->shape_string() << " " << target_blobs[j]->shape_string();
+          WinogradLayer<Dtype> *winograd_layer =
+              (WinogradLayer<Dtype> *)(layers_[target_layer_id].get());
+          winograd_layer->ReshapeToWinograd();
+          needToReshapeWinograd = true;
+        }
+        else if (std::string(source_layer->type()) == "Convolution" &&
+            std::string(layers_[target_layer_id]->type()) == "Winograd") {
+          // target Winograd layer reshaped too early
+          target_blobs[j]->Reshape(source_layer->blobs()[j]->shape());
+          needToReshapeWinograd = true;
+        }
+      }
+
       CHECK(target_blobs[j]->shape() == source_blob->shape())
           << "Cannot share param " << j << " weights from layer '"
           << source_layer_name << "'; shape mismatch.  Source param shape is "
           << source_blob->shape_string() << "; target param shape is "
           << target_blobs[j]->shape_string();
       target_blobs[j]->ShareData(*source_blob);
+
+      if (needToReshapeWinograd) {
+        layers_[target_layer_id]->WeightAlign();
+      }
     }
   }
 }
@@ -1517,6 +1598,7 @@ template <typename Dtype>
 void Net<Dtype>::Update() {
   for (int i = 0; i < learnable_params_.size(); ++i) {
     learnable_params_[i]->Update();
+    learnable_params_[i]->Zerout(Solver<Dtype>::getPruneThreshold());
   }
 }
 
