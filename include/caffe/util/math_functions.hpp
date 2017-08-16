@@ -77,7 +77,7 @@ template <typename Dtype>
 void caffe_cpu_copy(const size_t N, const Dtype* X, Dtype* Y);
 
 template <typename Dtype>
-void caffe_set(const size_t N, const Dtype alpha, Dtype *X);
+void caffe_set(unsigned long N, Dtype alpha, Dtype *X);
 
 inline void caffe_memset(const size_t N, const int alpha, void* X) {
   memset(X, alpha, N);  // NOLINT(caffe/alt_fn)
@@ -104,8 +104,7 @@ void caffe_mul(const long N, const Dtype* a, const Dtype* b, Dtype* y);
 template <typename Dtype>
 void caffe_div(const long N, const Dtype* a, const Dtype* b, Dtype* y);
 
-template <typename Dtype>
-void caffe_div_checkzero(const int N, const Dtype* a, const Dtype* b, Dtype* y);
+
 
 template <typename Dtype>
 void caffe_inv(const int N, const Dtype* a, Dtype* y);
@@ -224,7 +223,7 @@ void caffe_cpu_if_all_zero(const int M, const int N, const Dtype *X, int* y, boo
 
 //get the mask(0) of all-zero columns and rows
 template <typename Dtype>
-void caffe_cpu_all_zero_mask(const int M, const int N, const Dtype *X, Dtype* y);
+void caffe_cpu_all_zero_mask(int M, int N, const Dtype *X, Dtype* y);
 
 //get column(true)/row(false) sparsity in matrix
 template <typename Dtype>
