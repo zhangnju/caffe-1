@@ -312,25 +312,9 @@ void SGDSolver<Dtype>::ApplyUpdate() {
 	}
 	LOG(INFO) << sparsity_msg_stream.str();
 
-	sparsity_msg_stream.str("");
-	sparsity_msg_stream << "     Winograd Sparsity %: \n";
-	for (int param_id = 0; param_id < this->net_->learnable_params().size(); ++param_id) {
-    if (this->net_->learnable_params()[param_id]->num_axes() >= 2) {
-		  sparsity_msg_stream << GetWinogradSparsity(param_id) <<"\t";
-    }
-	}
-	LOG(INFO) << sparsity_msg_stream.str();
+	
 
-	sparsity_msg_stream.str("");
-	sparsity_msg_stream << "     Winograd Old Sparsity %: \n";
-	for (int param_id = 0; param_id < this->net_->learnable_params().size(); ++param_id) {
-    if (this->net_->learnable_params()[param_id]->num_axes() >= 2) {
-		  sparsity_msg_stream << GetWinogradSparsityOld(param_id) <<"\t";
-    }
-	}
-	LOG(INFO) << sparsity_msg_stream.str();
-
-  PrintWinogradFiberSliceSparsity();
+ 
 
 #if 0
 	sparsity_msg_stream.str("");
