@@ -58,7 +58,6 @@ DEFINE_VSL_BINARY_FUNC(DivCheckZero, y[i] = (b[i]==0 ? 0: a[i] / b[i]));
 
 #ifdef USE_MKL
 
-#include <mkl.h>
 #include <mkl_cblas.h>
 
 #else  // If use MKL, simply include the MKL header
@@ -96,6 +95,7 @@ DEFINE_VSL_UNARY_FUNC(Sqr, y[i] = a[i] * a[i]);
 DEFINE_VSL_UNARY_FUNC(Exp, y[i] = exp(a[i]));
 DEFINE_VSL_UNARY_FUNC(Ln, y[i] = log(a[i]));
 DEFINE_VSL_UNARY_FUNC(Abs, y[i] = fabs(a[i]));
+DEFINE_VSL_UNARY_FUNC(Inv, y[i] = 1/(a[i]));
 
 // A simple way to define the vsl unary functions with singular parameter b.
 // The operation should be in the form e.g. y[i] = pow(a[i], b)
