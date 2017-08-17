@@ -96,8 +96,6 @@ void caffe_cpu_gemv<double>(const CBLAS_TRANSPOSE TransA, const int M,
 template <>
 void caffe_axpy<float>(const long N, const float alpha, const float* X,
     float* Y) { cblas_saxpy(N, alpha, X, 1, Y, 1); }
-	
-
 
 template <>
 void caffe_axpy<double>(const long N, const double alpha, const double* X,
@@ -267,7 +265,11 @@ void caffe_cpu_axpby<double>(const long N, const double alpha, const double* X,
 template <>
 void caffe_axpy<size_t>(const long N, const size_t alpha, const size_t* X,
     size_t* Y) { }
-
+	
+template <>
+void caffe_axpy<long>(const long N, const long alpha, const long* X,
+    long* Y) { }
+	
 template <>
 void caffe_add<float>(const long n, const float* a, const float* b,
     float* y) {
@@ -572,9 +574,6 @@ double caffe_cpu_dot<double>(const long n, const double* x, const double* y);
 
 template
 size_t caffe_cpu_dot<size_t>(const long n, const size_t* x, const size_t* y);
-
-template
-size_t caffe_cpu_dot<long>(const long n, const long* x, const long* y);
 
 
 
