@@ -333,12 +333,16 @@ void caffe_div_checkzero<double>(const int n, const double* a, const double* b,
 
 template <>
 void caffe_inv<float>(const int n, const float* a, float* y) {
-  vsInv(n, a, y);
+  //vsInv(n, a, y);
+  for (int i = 0; i < n; ++i)
+       y[i]=1/(a[i]+0.01);
 }
 
 template <>
 void caffe_inv<double>(const int n, const double* a, double* y) {
-  vdInv(n, a, y);
+  //vdInv(n, a, y);
+  for (int i = 0; i < n; ++i)
+       y[i]=1/(a[i]+0.01);
 }
 
 template <>
