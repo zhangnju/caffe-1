@@ -99,7 +99,7 @@ void caffe_axpy<float>(const long N, const float alpha, const float* X,
 	
 template <>
 void caffe_axpy<long>(const long N, const long alpha, const long* X,
-    long* Y) { cblas_saxpy(N, alpha, X, 1, Y, 1); }
+    long* Y) { cblas_zaxpy(N, alpha, X, 1, Y, 1); }
 
 template <>
 void caffe_axpy<double>(const long N, const double alpha, const double* X,
@@ -202,6 +202,7 @@ template void caffe_cpu_copy<unsigned int>(const size_t N, const unsigned int* X
     unsigned int* Y);
 template void caffe_cpu_copy<float>(const size_t N, const float* X, float* Y);
 template void caffe_cpu_copy<double>(const size_t N, const double* X, double* Y);
+template void caffe_cpu_copy<long>(const size_t N, const long* X, long* Y);
 
 template <typename Dtype>
 void caffe_copy(const size_t N, const Dtype* X, Dtype* Y) {
@@ -230,7 +231,6 @@ template void caffe_copy<int>(const size_t N, const int* X, int* Y);
 template void caffe_copy<unsigned int>(const size_t N, const unsigned int* X,
     unsigned int* Y);
 template void caffe_copy<long>(const int N, const long* X, long* Y);
-template void caffe_copy<long>(unsigned long N, const long* X, long* Y);
 template void caffe_copy<float>(const int N, const float* X, float* Y);
 template void caffe_copy<double>(const int N, const double* X, double* Y);
 template void caffe_copy<char>(const int N, const char* X, char* Y);
