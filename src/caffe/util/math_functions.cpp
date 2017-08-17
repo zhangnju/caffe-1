@@ -228,11 +228,11 @@ template void caffe_copy<bool>(const size_t N, const bool* X, bool* Y);
 template void caffe_copy<int>(const size_t N, const int* X, int* Y);
 template void caffe_copy<unsigned int>(const size_t N, const unsigned int* X,
     unsigned int* Y);
-template void caffe_copy<long>(const int N, const long* X, long* Y);
-template void caffe_copy<float>(const int N, const float* X, float* Y);
-template void caffe_copy<double>(const int N, const double* X, double* Y);
-template void caffe_copy<char>(const int N, const char* X, char* Y);
-template void caffe_copy<size_t>(const int N, const size_t* X, size_t* Y);
+template void caffe_copy<long>(const size_t N, const long* X, long* Y);
+template void caffe_copy<float>(const size_t N, const float* X, float* Y);
+template void caffe_copy<double>(const size_t N, const double* X, double* Y);
+template void caffe_copy<char>(const size_t N, const char* X, char* Y);
+template void caffe_copy<size_t>(const size_t N, const size_t* X, size_t* Y);
 
 template <>
 void caffe_scal<float>(const long N, const float alpha, float *X) {
