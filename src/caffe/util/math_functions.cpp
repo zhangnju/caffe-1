@@ -249,6 +249,10 @@ void caffe_scal<size_t>(const long N, const size_t alpha, size_t *X) {
 }
 
 template <>
+void caffe_scal<long>(const long N, const long alpha, long *X) {
+}
+
+template <>
 void caffe_cpu_axpby<float>(const long N, const float alpha, const float* X,
                             const float beta, float* Y) {
   cblas_saxpby(N, alpha, X, 1, beta, Y, 1);
