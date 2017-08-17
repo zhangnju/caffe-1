@@ -99,7 +99,7 @@ void caffe_axpy<float>(const long N, const float alpha, const float* X,
 	
 template <>
 void caffe_axpy<long>(const long N, const long alpha, const long* X,
-    long* Y) { cblas_zaxpy(N, alpha, X, 1, Y, 1); }
+    long* Y) { cblas_daxpy(N, alpha, X, 1, Y, 1); }
 
 template <>
 void caffe_axpy<double>(const long N, const double alpha, const double* X,
