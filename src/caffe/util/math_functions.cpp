@@ -573,6 +573,9 @@ double caffe_cpu_dot<double>(const long n, const double* x, const double* y);
 template
 size_t caffe_cpu_dot<size_t>(const long n, const size_t* x, const size_t* y);
 
+template
+size_t caffe_cpu_dot<long>(const long n, const long* x, const long* y);
+
 
 
 
