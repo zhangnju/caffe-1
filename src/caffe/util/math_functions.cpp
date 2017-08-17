@@ -689,6 +689,8 @@ void caffe_cpu_all_zero_mask(int M, int N, const Dtype *X, Dtype* Y){
 	}
 }
 template
+void caffe_cpu_all_zero_mask(const int M, const int N, const bool *X, bool* y);
+template
 void caffe_cpu_all_zero_mask(const int M, const int N, const float *X, float* y);
 template
 void caffe_cpu_all_zero_mask(const int M, const int N, const double *X, double* y);
