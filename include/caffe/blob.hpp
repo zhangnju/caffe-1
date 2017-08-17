@@ -300,7 +300,7 @@ class Blob {
   Dtype* mutable_gpu_connectivity();
 
   void Zerout(Dtype threshold);
-  //void Disconnect(DisconnectMode mode, Dtype thre, int group=1);
+  void Disconnect(DisconnectMode mode, Dtype thre, int group=1);
   inline void Connect(){ InitializeConnectivity(); }
   Dtype GetSparsity(Dtype threshold);
   Dtype GetWinogradSparsity(Dtype threshold);

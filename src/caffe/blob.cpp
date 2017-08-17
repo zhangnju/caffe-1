@@ -365,7 +365,7 @@ void Blob<Dtype>::Zerout(Dtype thre) {
     LOG(FATAL) << "Syncedmem not initialized.";
   }
 }
-#if 0
+
 template <typename Dtype>
 void Blob<Dtype>::Disconnect(DisconnectMode mode,Dtype thre, int group) {
 	this->Zerout(thre);
@@ -406,7 +406,7 @@ void Blob<Dtype>::Disconnect(DisconnectMode mode,Dtype thre, int group) {
 	}
 
 }
-#endif
+
 template <typename Dtype>
 Dtype Blob<Dtype>::GetSparsity(Dtype thre){
   {
