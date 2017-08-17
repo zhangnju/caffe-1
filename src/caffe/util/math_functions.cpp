@@ -97,9 +97,7 @@ template <>
 void caffe_axpy<float>(const long N, const float alpha, const float* X,
     float* Y) { cblas_saxpy(N, alpha, X, 1, Y, 1); }
 	
-template <>
-void caffe_axpy<long>(const long N, const long alpha, const long* X,
-    long* Y) { cblas_daxpy(N, alpha, X, 1, Y, 1); }
+
 
 template <>
 void caffe_axpy<double>(const long N, const double alpha, const double* X,
@@ -561,9 +559,6 @@ template <typename Dtype>
 Dtype caffe_cpu_dot(const long n, const Dtype* x, const Dtype* y) {
   return caffe_cpu_strided_dot(n, x, 1, y, 1);
 }
-
-template
-float caffe_cpu_dot<long>(const long n, const long* x, const long* y);
 
 template
 float caffe_cpu_dot<float>(const long n, const float* x, const float* y);
