@@ -248,6 +248,7 @@ void caffe_scal<size_t>(const long N, const size_t alpha, size_t *X) {
 
 template <>
 void caffe_scal<long>(const long N, const long alpha, long *X) {
+  NOT_IMPLEMENTED;
 }
 
 template <>
@@ -574,6 +575,13 @@ double caffe_cpu_dot<double>(const long n, const double* x, const double* y);
 
 template
 size_t caffe_cpu_dot<size_t>(const long n, const size_t* x, const size_t* y);
+
+template <>
+long caffe_cpu_dot<long>(const long n, const long* x, const long* y)
+{
+   NOT_IMPLEMENTED;
+   return 0;
+}
 
 
 
