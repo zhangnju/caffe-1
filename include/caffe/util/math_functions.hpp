@@ -205,6 +205,7 @@ inline void caffe_cpu_if_nonzerout(int n, const Dtype *x, Dtype *y, Dtype thre) 
 
 // output is 1 for the positives, 0 for zero, and -1 for the negatives
 DEFINE_CAFFE_CPU_UNARY_FUNC(sign, y[i] = caffe_sign<Dtype>(x[i]));
+DEFINE_CAFFE_CPU_UNARY_FUNC(eltwise_multi, y[i] = y[i]*x[i]);
 
 // This returns a nonzero value if the input has its sign bit set.
 // The name sngbit is meant to avoid conflicts with std::signbit in the macro.

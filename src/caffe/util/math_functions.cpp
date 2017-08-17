@@ -102,7 +102,7 @@ void caffe_axpy<double>(const long N, const double alpha, const double* X,
     double* Y) { cblas_daxpy(N, alpha, X, 1, Y, 1); }
 
 template <typename Dtype>
-void caffe_set(unsigned long N, Dtype alpha, Dtype* Y) {
+void caffe_set(const long N, Dtype alpha, Dtype* Y) {
   // If we are executing parallel region already then do not start another one
   // if also number of data to be processed is smaller than arbitrary:
   // threashold 12*4 cachelines per thread then no parallelization is to be made
