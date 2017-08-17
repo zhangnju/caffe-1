@@ -305,7 +305,17 @@ void caffe_div<double>(const long n, const double* a, const double* b,
   vdDiv(n, a, b, y);
 }
 
+template <>
+void caffe_div_checkzero<float>(const int n, const float* a, const float* b,
+    float* y) {
+  vsDivCheckZero(n, a, b, y);
+}
 
+template <>
+void caffe_div_checkzero<double>(const int n, const double* a, const double* b,
+		double* y) {
+  vdDivCheckZero(n, a, b, y);
+}
 
 template <>
 void caffe_inv<float>(const int n, const float* a, float* y) {

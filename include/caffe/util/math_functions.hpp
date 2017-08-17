@@ -104,7 +104,8 @@ void caffe_mul(const long N, const Dtype* a, const Dtype* b, Dtype* y);
 template <typename Dtype>
 void caffe_div(const long N, const Dtype* a, const Dtype* b, Dtype* y);
 
-
+template <typename Dtype>
+void caffe_div_checkzero(const int N, const Dtype* a, const Dtype* b, Dtype* y);
 
 template <typename Dtype>
 void caffe_inv(const int N, const Dtype* a, Dtype* y);
