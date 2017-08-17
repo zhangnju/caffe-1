@@ -102,7 +102,7 @@ void caffe_axpy<double>(const long N, const double alpha, const double* X,
     double* Y) { cblas_daxpy(N, alpha, X, 1, Y, 1); }
 
 template <typename Dtype>
-void caffe_set(const int N, const Dtype alpha, Dtype* Y) {
+void caffe_set(unsigned long N, const Dtype alpha, Dtype* Y) {
   // If we are executing parallel region already then do not start another one
   // if also number of data to be processed is smaller than arbitrary:
   // threashold 12*4 cachelines per thread then no parallelization is to be made
@@ -142,13 +142,13 @@ void caffe_set(const int N, const Dtype alpha, Dtype* Y) {
   }
 }
 
-template void caffe_set<char>(const int N, const char alpha, char* Y);
-template void caffe_set<int>(const int N, const int alpha, int* Y);
-template void caffe_set<unsigned int>(const int N, const unsigned int alpha, unsigned int* Y);
-template void caffe_set<long>(const int N, const long alpha, long* Y);
-template void caffe_set<float>(const int N, const float alpha, float* Y);
-template void caffe_set<double>(const int N, const double alpha, double* Y);
-template void caffe_set<size_t>(const int N, const size_t alpha, size_t* Y);
+template void caffe_set<char>(unsigned long N, const char alpha, char* Y);
+template void caffe_set<int>(unsigned long N, const int alpha, int* Y);
+template void caffe_set<unsigned int>(unsigned long N, const unsigned int alpha, unsigned int* Y);
+template void caffe_set<long>(unsigned long N, const long alpha, long* Y);
+template void caffe_set<float>(unsigned long N, const float alpha, float* Y);
+template void caffe_set<double>(unsigned long N, const double alpha, double* Y);
+template void caffe_set<size_t>(unsigned long N, const size_t alpha, size_t* Y);
 
 template <>
 void caffe_add_scalar(const long N, const float alpha, float* Y) {
