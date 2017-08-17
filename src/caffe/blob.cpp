@@ -122,7 +122,6 @@ template <typename Dtype>
 Blob<Dtype>::Blob(const vector<int>& shape)
   // capacity_ must be initialized before calling Reshape
   : capacity_(0) {
-
   Reshape(shape);
 }
 
@@ -894,5 +893,6 @@ template class Blob<bool>;
 template class Blob<int>;
 template class Blob<size_t>;
 template class Blob<unsigned int>;
+template class Blob<long>;
 
 }  // namespace caffe
