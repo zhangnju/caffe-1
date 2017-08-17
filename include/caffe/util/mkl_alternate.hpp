@@ -58,6 +58,7 @@ DEFINE_VSL_BINARY_FUNC(DivCheckZero, y[i] = (b[i]==0 ? 0: a[i] / b[i]));
 
 #ifdef USE_MKL
 
+#include <mkl.h>
 #include <mkl_cblas.h>
 
 #else  // If use MKL, simply include the MKL header
