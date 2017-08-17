@@ -142,6 +142,7 @@ void caffe_set(unsigned long N,  Dtype alpha, Dtype* Y) {
   }
 }
 
+template void caffe_set<bool>(unsigned long N, bool alpha, bool* Y);
 template void caffe_set<char>(unsigned long N, char alpha, char* Y);
 template void caffe_set<int>(unsigned long N,  int alpha, int* Y);
 template void caffe_set<unsigned int>(unsigned long N, unsigned int alpha, unsigned int* Y);
