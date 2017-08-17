@@ -60,11 +60,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace caffe {
 
-templete float Solver<float>::prune_threshold_;
-template float Solver<float>::measure_threshold_;
+float Solver<float>::prune_threshold_;
+float Solver<float>::measure_threshold_;
 
-template double Solver<double>::prune_threshold_;
-template double Solver<double>::measure_threshold_;
+double Solver<double>::prune_threshold_;
+double Solver<double>::measure_threshold_;
 
 template<typename Dtype>
 void Solver<Dtype>::SetActionFunction(ActionCallback func) {
